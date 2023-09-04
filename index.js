@@ -2,10 +2,25 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 const cheerio = require('cheerio');
-const port = 3000;
+const port = process.env.PORT || 3000; // Use the PORT environment variable or 3000 as the default
 const pretty = require('pretty');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core'); // Import puppeteer-core
 const path = require('path');
+
+// Check if running in AWS Lambda
+const isLambda = !!process.env.AWS_LAMBDA_FUNCTION_VERSION;
+
+// Define a function to get the Chromium executable path
+const getChromiumExecutablePath = async () => {
+  if (isLambda) {
+    const chrome = require('chrome-aws-lambda');
+    return await chrome.executablePath;
+  } else {
+    // Provide the local Chromium executable path here
+    // Replace '/path/to/your/chromium' with the actual path
+    return '/path/to/your/chromium';
+  }
+};
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
@@ -24,8 +39,12 @@ app.get('/hashtags/:keyword', async (req, res) => {
 
     // Fetch HTML content from a website (replace URL with actual URL)
     const url = `https://www.tiktok.com/search?q=${keyword}`;
-    // Launch a headless browser instance
-    const browser = await puppeteer.launch();
+    
+    // Get the Chromium executable path
+    const executablePath = await getChromiumExecutablePath();
+
+    // Launch a headless browser instance with the specified executable path
+    const browser = await puppeteer.launch({ executablePath });
 
     // Open a new page
     const page = await browser.newPage();
