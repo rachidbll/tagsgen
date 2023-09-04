@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
 
 // Hashtag analytics route
 app.get('/hashtags/:keyword', async (req, res) => {
-
+  let options = {};
   if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
     options = {
       args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
@@ -44,9 +44,6 @@ app.get('/hashtags/:keyword', async (req, res) => {
 
     // Fetch HTML content from a website (replace URL with actual URL)
     const url = `https://www.tiktok.com/search?q=${keyword}`;
-    
-    // Get the Chromium executable path
-    const executablePath = await getChromiumExecutablePath();
 
     // Launch a headless browser instance with the specified executable path
     let browser = await puppeteer.launch(options);
