@@ -27,6 +27,6 @@
     "mini-css-extract-plugin": "^2.7.6",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
-    "puppeteer": "^21.1.1"
+    "puppeteer": "^16.2.0"
   }
 }

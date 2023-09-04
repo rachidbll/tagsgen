@@ -4,23 +4,17 @@ const app = express();
 const cheerio = require('cheerio');
 const port = process.env.PORT || 3000; // Use the PORT environment variable or 3000 as the default
 const pretty = require('pretty');
-const puppeteer = require('puppeteer-core'); // Import puppeteer-core
 const path = require('path');
+let chrome = {};
+let puppeteer;
 
-// Check if running in AWS Lambda
-const isLambda = !!process.env.AWS_LAMBDA_FUNCTION_VERSION;
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+  chrome = require("chrome-aws-lambda");
+  puppeteer = require("puppeteer-core");
+} else {
+  puppeteer = require("puppeteer");
+}
 
-// Define a function to get the Chromium executable path
-const getChromiumExecutablePath = async () => {
-  if (isLambda) {
-    const chrome = require('chrome-aws-lambda');
-    return await chrome.executablePath;
-  } else {
-    // Provide the local Chromium executable path here
-    // Replace '/path/to/your/chromium' with the actual path
-    return '/path/to/your/chromium';
-  }
-};
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
@@ -34,6 +28,17 @@ app.get('/', (req, res) => {
 
 // Hashtag analytics route
 app.get('/hashtags/:keyword', async (req, res) => {
+
+  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    options = {
+      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
+      defaultViewport: chrome.defaultViewport,
+      executablePath: await chrome.executablePath,
+      headless: true,
+      ignoreHTTPSErrors: true,
+    };
+  }
+
   try {
     const keyword = req.params.keyword;
 
@@ -44,7 +49,7 @@ app.get('/hashtags/:keyword', async (req, res) => {
     const executablePath = await getChromiumExecutablePath();
 
     // Launch a headless browser instance with the specified executable path
-    const browser = await puppeteer.launch({ executablePath });
+    let browser = await puppeteer.launch(options);
 
     // Open a new page
     const page = await browser.newPage();
@@ -87,17 +92,11 @@ app.get('/hashtags/:keyword', async (req, res) => {
   }
 });
 
-// Fetch HTML function
-async function fetchHTML(url) {
-  try {
-    const response = await axios.get(url);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching HTML:', error);
-    throw error;
-  }
-}
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+
+//------------------ /////  ----------------------
+
