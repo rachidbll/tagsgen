@@ -50,10 +50,9 @@ app.get('/hashtags/:keyword', async (req, res) => {
     const pageSource = await page.content();
     // Load the HTML content into cheerio
     const soup = cheerio.load(pageSource);
-
+    console.log(pageSource);
     // Select all elements with class "tiktok-1soki6-DivItemContainerForSearch.e19c29qe11"
     const elements = soup('.tiktok-1soki6-DivItemContainerForSearch.e19c29qe11');
-    console.log(elements);
     const info = [];
 
     elements.each((index, element) => {
