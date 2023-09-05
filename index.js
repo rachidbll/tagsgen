@@ -5,7 +5,7 @@ const cheerio = require('cheerio');
 const port = process.env.PORT || 3000; // Use the PORT environment variable or 3000 as the default
 const pretty = require('pretty');
 const path = require('path');
-const puppeteer = require("puppter-core")
+const puppeteer = require('puppeteer-core');
 
 
 app.set('view engine', 'ejs');
