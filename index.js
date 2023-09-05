@@ -5,15 +5,7 @@ const cheerio = require('cheerio');
 const port = process.env.PORT || 3000; // Use the PORT environment variable or 3000 as the default
 const pretty = require('pretty');
 const path = require('path');
-let chrome = {};
-let puppeteer;
-
-if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-  chrome = require("chrome-aws-lambda");
-  puppeteer = require("puppeteer-core");
-} else {
-  puppeteer = require("puppeteer");
-}
+const puppeteer = require("puppter-core")
 
 
 app.set('view engine', 'ejs');
@@ -28,30 +20,26 @@ app.get('/', (req, res) => {
 
 // Hashtag analytics route
 app.get('/hashtags/:keyword', async (req, res) => {
-  let options = {};
-  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    options = {
-      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath,
-      headless: true,
-      ignoreHTTPSErrors: true,
-    };
-  }
-
   try {
     const keyword = req.params.keyword;
 
-    // Fetch HTML content from a website (replace URL with actual URL)
-    const url = `https://www.tiktok.com/search?q=${keyword}`;
+    // Set up Puppeteer options to connect to Browserless
+    const browserlessApiKey = process.env.BROWSERLESS_API_KEY;
 
-    // Launch a headless browser instance with the specified executable path
-    let browser = await puppeteer.launch(options);
+    const puppeteerOptions = {
+      executablePath: 'https://chrome.browserless.io', // Browserless Chrome URL
+      browserWSEndpoint: `wss://chrome.browserless.io?token=${browserlessApiKey}`,
+      headless: true, // Set this to true for headless mode
+    };
+
+    // Launch a headless browser instance
+    const browser = await puppeteer.connect(puppeteerOptions);
 
     // Open a new page
     const page = await browser.newPage();
 
     // Navigate to a URL
+    const url = `https://www.tiktok.com/search?q=${keyword}`;
     await page.goto(url);
 
     // Wait for the content to load (you can adjust the wait time as needed)
@@ -76,11 +64,11 @@ app.get('/hashtags/:keyword', async (req, res) => {
         'user': user_id 
       });
     });
-  
+
     console.log(info);
 
     await browser.close();
-    
+
     // Send the info as JSON response
     res.json(info);
   } catch (error) {
@@ -94,6 +82,4 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-
-//------------------ /////  ----------------------
 
