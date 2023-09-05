@@ -30,7 +30,7 @@ app.get('/hashtags/:keyword', async (req, res) => {
     const puppeteerOptions = {
       executablePath: 'https://chrome.browserless.io', // Browserless Chrome URL
       browserWSEndpoint: `wss://chrome.browserless.io?token=${browserlessApiKey}`,
-      headless: true, // Set this to true for headless mode
+      headless: false, // Set this to true for headless mode
     };
 
     // Launch a headless browser instance
