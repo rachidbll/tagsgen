@@ -6,7 +6,7 @@ const port = process.env.PORT || 3000; // Use the PORT environment variable or 3
 const pretty = require('pretty');
 const path = require('path');
 // new methode
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 
 
 app.set('view engine', 'ejs');
